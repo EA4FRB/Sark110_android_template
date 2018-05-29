@@ -1,5 +1,31 @@
 package com.sark110.sark110_android_template;
 
+/*
+ * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
+ *
+ * MIT License
+ *
+ * Copyright (c) 2018 Melchor Varela - EA4FRB
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -80,14 +106,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void TestSark () {
         TextView text = findViewById(R.id.terminal);
-        mDevIntf.BeepCmd();
-        mDevIntf.VersionCmd();
+        mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
+        mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
         text.setText(
                 "Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: "  + String.valueOf(mDevIntf.getProtocolVer()) + "\n"
         );
         text.append("\n* Measurements: *\n");
         for (int i = 1; i <10; i++)
-        {
+        {   // Perform measurement at a frequency; obtain the different parameters using MeasureDataBin class methods
             MeasureDataBin bin = mDevIntf.MeasureCmd(10.0f + (float)(i));
             text.append("Frequency: " + (10.0f+i) + " VSWR: " + bin.getVswr() + " Rs:" + bin.getRs() + " Xs: " + bin.getXs() + "\n");
         }
