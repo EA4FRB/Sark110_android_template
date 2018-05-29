@@ -62,18 +62,18 @@ import android.os.Handler;
 import static android.content.Context.BLUETOOTH_SERVICE;
 
 public class BluetoothLEIntf extends DeviceIntf {
-    public static final String SERVICE_STRING = "49535343-fe7d-4ae5-8fa9-9fafd205e455";
-    public static final String WRITE_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
-    public static final String READ_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
-    public static final String DESCRIPTOR_STRING = "00002902-0000-1000-8000-00805f9b34fb";
+    private static final String SERVICE_STRING = "49535343-fe7d-4ae5-8fa9-9fafd205e455";
+    private static final String WRITE_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
+    private static final String READ_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
+    private static final String DESCRIPTOR_STRING = "00002902-0000-1000-8000-00805f9b34fb";
 
-    public static final UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
-    public static final UUID WRITE_UUID = UUID.fromString(WRITE_STRING);
-    public static final UUID READ_UUID = UUID.fromString(READ_STRING);
-    public static final UUID DESCRIPTOR_UUID = UUID.fromString(DESCRIPTOR_STRING);
+    private static final UUID SERVICE_UUID = UUID.fromString(SERVICE_STRING);
+    private static final UUID WRITE_UUID = UUID.fromString(WRITE_STRING);
+    private static final UUID READ_UUID = UUID.fromString(READ_STRING);
+    private static final UUID DESCRIPTOR_UUID = UUID.fromString(DESCRIPTOR_STRING);
 
-    public static final long SCAN_TIMEOUT = 10000;      /* ms */
-    public static final long RCV_TIMEOUT = 500;         /* ms */
+    private static final long SCAN_TIMEOUT = 10000;      /* ms */
+    private static final long RCV_TIMEOUT = 500;         /* ms */
 
     private boolean mScanning;
     private Handler mScanHandler;
@@ -109,7 +109,10 @@ public class BluetoothLEIntf extends DeviceIntf {
     {
         mConnected = false;
         BluetoothManager bluetoothManager = (BluetoothManager) mContext.getSystemService(BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (bluetoothManager != null)
+            mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        connect();
     }
 
     public void onResume() {
@@ -131,38 +134,22 @@ public class BluetoothLEIntf extends DeviceIntf {
          * from the Bluetooth setup menu
          */
         connectBond();
-        //connectScan();
+        //startScan();
     }
 
-    private void connectScan()
-    {
-        if (!isConnected()) {
-            if (mScanResults != null && !mScanResults.isEmpty()) {
-                for (String deviceAddress : mScanResults.keySet()) {
-                    BluetoothDevice device = mScanResults.get(deviceAddress);
-                    connectDevice(device);
-                }
-            }
-            else {
-                startScan();
-            }
-        }
-    }
     private void connectBond()
     {
-        if (!isConnected()) {
-            disconnectGattServer();
-            BluetoothManager bluetoothManager = (BluetoothManager) mContext.getSystemService(BLUETOOTH_SERVICE);
-            for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter().getBondedDevices()) {
-                int type = device.getType();
+        disconnectGattServer();
+        BluetoothManager bluetoothManager = (BluetoothManager) mContext.getSystemService(BLUETOOTH_SERVICE);
+        for (BluetoothDevice device : BluetoothAdapter.getDefaultAdapter().getBondedDevices()) {
+            int type = device.getType();
 
-                if (type == BluetoothDevice.DEVICE_TYPE_LE) {
-                    final String deviceName = device.getName();
-                    if (deviceName != null) {
-                        if (deviceName.matches("SARK110-[0-9a-fA-F]{4}")) {
-                            BluetoothLEIntf.GattClientCallback gattClientCallback = new BluetoothLEIntf.GattClientCallback();
-                            mGatt = device.connectGatt(mContext, true, gattClientCallback);
-                        }
+            if (type == BluetoothDevice.DEVICE_TYPE_LE) {
+                final String deviceName = device.getName();
+                if (deviceName != null) {
+                    if (deviceName.matches("SARK110-[0-9a-fA-F]{4}")) {
+                        BluetoothLEIntf.GattClientCallback gattClientCallback = new BluetoothLEIntf.GattClientCallback();
+                        mGatt = device.connectGatt(mContext, true, gattClientCallback);
                     }
                 }
             }
@@ -170,7 +157,7 @@ public class BluetoothLEIntf extends DeviceIntf {
     }
     /* scanning */
     private void startScan() {
-        if (mScanning == true)
+        if (mScanning)
             return;
         disconnectGattServer();
         mScanResults = new HashMap<>();
@@ -237,7 +224,7 @@ public class BluetoothLEIntf extends DeviceIntf {
     }
 
     /* support functions */
-    public void disconnectGattServer() {
+    private void disconnectGattServer() {
         mConnected = false;
         if (mGatt != null) {
             mGatt.disconnect();
@@ -338,7 +325,8 @@ public class BluetoothLEIntf extends DeviceIntf {
 
         mWriteCharacteristic.setValue(data);
         mWriteCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        if(mGatt.writeCharacteristic(mWriteCharacteristic) == false){
+        if(!mGatt.writeCharacteristic(mWriteCharacteristic)){
+
         }
     }
 
@@ -358,13 +346,14 @@ public class BluetoothLEIntf extends DeviceIntf {
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
         mGatt.writeDescriptor(descriptor);
         mGatt.setCharacteristicNotification(mReadCharacteristic, true);
-        if(mGatt.readCharacteristic(mReadCharacteristic) == false){
+        if(!mGatt.readCharacteristic(mReadCharacteristic)){
+
         }
     }
 
     protected int SendRcv(byte snd[], byte rcv[])
     {
-        if (mConnected == false)
+        if (!mConnected)
             return -1;
 
         mSyncRcv = new CountDownLatch(1);

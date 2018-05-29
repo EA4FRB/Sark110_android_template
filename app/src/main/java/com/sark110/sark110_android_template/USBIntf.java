@@ -3,9 +3,9 @@ package com.sark110.sark110_android_template;
 /**
  ******************************************************************************
  * @author  Melchor Varela - EA4FRB
- * @brief   SARK-110 interface for Android
+ *
+ * SARK-110 interface for Android
  ******************************************************************************
- * @copy
  *
  *  This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
  *
@@ -58,13 +58,6 @@ public class USBIntf extends DeviceIntf {
     }
 
     public void connect () {
-        mUsbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
-        if (mUsbManager.getDeviceList().isEmpty())
-            return;
-        mUsbDevice = (UsbDevice) mUsbManager.getDeviceList().values().toArray()[0];
-        mConnection = mUsbManager.openDevice(mUsbDevice);
-        mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);	//Get USB permission intent for broadcast
-        mUsbManager.requestPermission(mUsbDevice, mPermissionIntent);
     }
 
     public void close()
@@ -78,6 +71,16 @@ public class USBIntf extends DeviceIntf {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         mContext.registerReceiver(mUsbReceiver, filter);				//Register broadcast receiver
+
+        mUsbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+        if (mUsbManager != null && mUsbManager.getDeviceList().isEmpty())
+            return;
+        if (mUsbManager != null) {
+            mUsbDevice = (UsbDevice) mUsbManager.getDeviceList().values().toArray()[0];
+        }
+        mConnection = mUsbManager.openDevice(mUsbDevice);
+        mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);	//Get USB permission intent for broadcast
+        mUsbManager.requestPermission(mUsbDevice, mPermissionIntent);
     }
 
     public void onResume() {
@@ -85,7 +88,7 @@ public class USBIntf extends DeviceIntf {
     }
 
     private void setDevice(Intent intent) {
-        mUsbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        mUsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (!intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
         {
             mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);	//Get USB permission intent for broadcast
@@ -95,6 +98,7 @@ public class USBIntf extends DeviceIntf {
             mConnection = mUsbManager.openDevice(mUsbDevice);		//Connect to device
             mUsbIntf = mUsbDevice.getInterface(1);
             if (null == mConnection) {
+
             } else {
                 mConnection.claimInterface(mUsbIntf, true);			//Device connected - claim ownership over the interface
             }
@@ -104,6 +108,7 @@ public class USBIntf extends DeviceIntf {
                     mEndPointWrite = mUsbIntf.getEndpoint(1);
                 }
             } catch (Exception e) {
+
             }
             try {
                 //Direction of end point 0 - IN - from device to host
@@ -111,6 +116,7 @@ public class USBIntf extends DeviceIntf {
                     mEndPointRead = mUsbIntf.getEndpoint(0);
                 }
             } catch (Exception e) {
+
             }
         }
     }
@@ -131,6 +137,7 @@ public class USBIntf extends DeviceIntf {
                     setConnected(true);
                 }
                 if (mUsbDevice == null) {
+
                 }
             }
             //device detached
@@ -145,7 +152,7 @@ public class USBIntf extends DeviceIntf {
 
     protected int SendRcv(byte snd[], byte rcv[]) {
         int status = -1;
-        if (mConnected == false)
+        if (!mConnected)
             return status;
         if (mUsbDevice != null && mEndPointWrite != null && mUsbManager.hasPermission(mUsbDevice)) {
             status = mConnection.bulkTransfer(mEndPointWrite, snd, COMMAND_LEN, 255); 	//Send data to device

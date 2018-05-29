@@ -17,10 +17,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -31,15 +31,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /* SARK110 */
-        //mDevIntf = new BluetoothLEIntf(this);   // (future device with LE support)
+        //mDevIntf = new BluetoothLEIntf(this);     // (future device with LE support)
         mDevIntf = new USBIntf(this);
 		mDevIntf.onCreate();
-        mDevIntf.connect();
 		// Setup listener for connection events from the device
 		mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
 			@Override
 			public void onConnectionStateChanged(DeviceIntf helper, final boolean isConnected) {
-			TextView text = (TextView) findViewById(R.id.connect_stat);
+			TextView text = findViewById(R.id.connect_stat);
 			if (isConnected)
 				text.setText("Connected");
 			else {
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void TestSark () {
-        TextView text = (TextView) findViewById(R.id.terminal);
+        TextView text = findViewById(R.id.terminal);
         mDevIntf.BeepCmd();
         mDevIntf.VersionCmd();
         text.setText(
