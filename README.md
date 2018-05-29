@@ -68,13 +68,13 @@ Then call method onCreate() and then setup a listener for connection events.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	...
-        //mDevIntf = new BluetoothLEIntf(this);     // (future device with LE support)
-        mDevIntf = new USBIntf(this);
+        //mDevIntf = new BluetoothLEIntf(this);     // Create instance: Bluetooth option (future device with LE support)
+        mDevIntf = new USBIntf(this);               // Create instance: USB option
 		mDevIntf.onCreate();
 		// Setup listener for connection events from the device
 		mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
 			@Override
-			public void onConnectionStateChanged(DeviceIntf helper, final boolean isConnected) {
+			public void onConnectionStateChanged(DeviceIntf deviceIntf, final boolean isConnected) {
 			TextView text = findViewById(R.id.connect_stat);
 			if (isConnected)
 				text.setText("Connected");
