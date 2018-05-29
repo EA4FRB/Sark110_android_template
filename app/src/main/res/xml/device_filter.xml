@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SARK-110 -->
+    <usb-device vendor-id="0483" product-id="5750" />
+</resources>
