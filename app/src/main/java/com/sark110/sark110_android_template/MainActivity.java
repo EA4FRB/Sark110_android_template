@@ -61,16 +61,16 @@ public class MainActivity extends AppCompatActivity {
         mDevIntf = new USBIntf(this);       // Create instance: USB option
 		mDevIntf.onCreate();
 		// Setup listener for connection events from the device
-		mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
-			@Override
-			public void onConnectionStateChanged(DeviceIntf deviceIntf, final boolean isConnected) {
-			TextView text = findViewById(R.id.connect_stat);
-			if (isConnected)
-				text.setText("Connected");
-			else {
-				text.setText("Disconnected");
-			}
-			}
+        mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
+            @Override
+            public void onConnectionStateChanged(DeviceIntf deviceIntf, final boolean isConnected) {
+                TextView text = findViewById(R.id.connect_stat);
+                if (isConnected)
+                    text.setText("Connected");
+                else {
+                    text.setText("Disconnected");
+                }
+            }
         });
     }
 
@@ -105,19 +105,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void TestSark () {
-        TextView text = findViewById(R.id.terminal);
-        mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
-        mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
-        text.setText(
-                "Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: "  + String.valueOf(mDevIntf.getProtocolVer()) + "\n"
-        );
-        text.append("\n* Measurements: *\n");
-        for (int i = 1; i <10; i++)
-        {   // Perform measurement at a frequency; obtain the different parameters using MeasureDataBin class methods
-            MeasureDataBin bin = mDevIntf.MeasureCmd(10.0f + (float)(i));
-            text.append("Frequency: " + (10.0f+i) + " VSWR: " + bin.getVswr() + " Rs:" + bin.getRs() + " Xs: " + bin.getXs() + "\n");
+        if (!mDevIntf.isConnected())
+            mDevIntf.connect();
+        else {
+            TextView text = findViewById(R.id.terminal);
+            mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
+            mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
+            text.setText(
+                    "Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()) + "\n"
+            );
+            text.append("\n* Measurements: *\n");
+            for (int i = 1; i < 10; i++) {   // Perform measurement at a frequency; obtain the different parameters using MeasureDataBin class methods
+                MeasureDataBin bin = mDevIntf.MeasureCmd(10.0f + (float) (i));
+                text.append("Frequency: " + (10.0f + i) + " VSWR: " + bin.getVswr() + " Rs:" + bin.getRs() + " Xs: " + bin.getXs() + "\n");
+            }
+            text.append("* The end *\n");
         }
-        text.append("* The end *\n");
     }
 
 }

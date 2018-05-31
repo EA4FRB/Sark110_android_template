@@ -39,7 +39,9 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 
-public class USBIntf extends DeviceIntf {
+import java.util.Objects;
+
+class USBIntf extends DeviceIntf {
     private static final String ACTION_USB_PERMISSION = "com.google.android.HID.action.USB_PERMISSION";
 
     private UsbDevice mUsbDevice;
@@ -47,7 +49,6 @@ public class USBIntf extends DeviceIntf {
     private UsbManager mUsbManager;
     private UsbEndpoint mEndPointRead;
     private UsbEndpoint mEndPointWrite;
-    private UsbInterface mUsbIntf;
     private PendingIntent mPermissionIntent;
 
     public USBIntf(Context context)
@@ -56,15 +57,6 @@ public class USBIntf extends DeviceIntf {
     }
 
     public void connect () {
-    }
-
-    public void close()
-    {
-        mConnected = false;
-        mContext.unregisterReceiver(mUsbReceiver);				        //Unregister broadcast receiver
-    }
-
-    public void onCreate () {
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
@@ -76,16 +68,28 @@ public class USBIntf extends DeviceIntf {
         if (mUsbManager != null) {
             mUsbDevice = (UsbDevice) mUsbManager.getDeviceList().values().toArray()[0];
         }
-        mConnection = mUsbManager.openDevice(mUsbDevice);
+        mConnection = Objects.requireNonNull(mUsbManager).openDevice(mUsbDevice);
         mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);	//Get USB permission intent for broadcast
         mUsbManager.requestPermission(mUsbDevice, mPermissionIntent);
+    }
+
+    public void close()
+    {
+        mConnected = false;
+        mContext.unregisterReceiver(mUsbReceiver);				        //Unregister broadcast receiver
+    }
+
+    public void onCreate () {
+        connect();
     }
 
     public void onResume() {
 
     }
 
-    private void setDevice(Intent intent) {
+    private boolean setDevice(Intent intent) {
+        boolean rc = true;
+
         mUsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (!intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false))
         {
@@ -94,29 +98,30 @@ public class USBIntf extends DeviceIntf {
         }
         if (mUsbDevice != null && intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
             mConnection = mUsbManager.openDevice(mUsbDevice);		//Connect to device
-            mUsbIntf = mUsbDevice.getInterface(1);
+            UsbInterface usbIntf = mUsbDevice.getInterface(1);
             if (null == mConnection) {
-
+                rc = false;
             } else {
-                mConnection.claimInterface(mUsbIntf, true);			//Device connected - claim ownership over the interface
+                mConnection.claimInterface(usbIntf, true);			//Device connected - claim ownership over the interface
             }
             try {
                 //Direction of end point 1 - OUT - from host to device
-                if (UsbConstants.USB_DIR_OUT == mUsbIntf.getEndpoint(1).getDirection()) {
-                    mEndPointWrite = mUsbIntf.getEndpoint(1);
+                if (UsbConstants.USB_DIR_OUT == usbIntf.getEndpoint(1).getDirection()) {
+                    mEndPointWrite = usbIntf.getEndpoint(1);
                 }
             } catch (Exception e) {
-
+                rc = false;
             }
             try {
                 //Direction of end point 0 - IN - from device to host
-                if (UsbConstants.USB_DIR_IN == mUsbIntf.getEndpoint(0).getDirection()) {
-                    mEndPointRead = mUsbIntf.getEndpoint(0);
+                if (UsbConstants.USB_DIR_IN == usbIntf.getEndpoint(0).getDirection()) {
+                    mEndPointRead = usbIntf.getEndpoint(0);
                 }
             } catch (Exception e) {
-
+                rc = false;
             }
         }
+        return rc;
     }
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
@@ -124,18 +129,19 @@ public class USBIntf extends DeviceIntf {
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
-                    setDevice(intent);
-                    setConnected(true);
+                    if (setDevice(intent))
+                        setConnected(true);
+                    else
+                        setConnected(false);
                 }
             }
             //device attached
             if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                 synchronized (this) {
-                    setDevice(intent);        //Connect to the selected device
-                    setConnected(true);
-                }
-                if (mUsbDevice == null) {
-
+                    if (setDevice(intent))
+                        setConnected(true);
+                    else
+                        setConnected(false);
                 }
             }
             //device detached

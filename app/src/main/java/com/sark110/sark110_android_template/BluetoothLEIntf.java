@@ -59,7 +59,7 @@ import android.os.Handler;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
 
-public class BluetoothLEIntf extends DeviceIntf {
+class BluetoothLEIntf extends DeviceIntf {
     private static final String SERVICE_STRING = "49535343-fe7d-4ae5-8fa9-9fafd205e455";
     private static final String WRITE_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
     private static final String READ_STRING = "49535343-1e4d-4bd9-ba61-23c647249616";
@@ -115,9 +115,7 @@ public class BluetoothLEIntf extends DeviceIntf {
 
     public void onResume() {
         // Check low energy support
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            // LE not supported on this device
-        }
+        mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     /* functions */
@@ -126,7 +124,7 @@ public class BluetoothLEIntf extends DeviceIntf {
         disconnectGattServer();
     }
 
-    public void connect () {
+    void connect() {
         /*
          * Implemented the comment bond method. This requires that the user manually bonds the device
          * from the Bluetooth setup menu
@@ -233,7 +231,7 @@ public class BluetoothLEIntf extends DeviceIntf {
     /* Callbacks */
     private class BtleScanCallback extends ScanCallback {
 
-        private Map<String, BluetoothDevice> mScanResults;
+        private final Map<String, BluetoothDevice> mScanResults;
 
         BtleScanCallback(Map<String, BluetoothDevice> scanResults) {
             mScanResults = scanResults;
@@ -323,9 +321,7 @@ public class BluetoothLEIntf extends DeviceIntf {
 
         mWriteCharacteristic.setValue(data);
         mWriteCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        if(!mGatt.writeCharacteristic(mWriteCharacteristic)){
-
-        }
+        mGatt.writeCharacteristic(mWriteCharacteristic);
     }
 
     private void enableReceiveNotifications() {
@@ -344,9 +340,7 @@ public class BluetoothLEIntf extends DeviceIntf {
         descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
         mGatt.writeDescriptor(descriptor);
         mGatt.setCharacteristicNotification(mReadCharacteristic, true);
-        if(!mGatt.readCharacteristic(mReadCharacteristic)){
-
-        }
+        mGatt.readCharacteristic(mReadCharacteristic);
     }
 
     protected int SendRcv(byte snd[], byte rcv[])

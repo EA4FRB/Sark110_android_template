@@ -32,7 +32,7 @@ public class MeasureDataBin {
 	private ComplexNumber mZs;
 
 	public void set_RefImp(float r0) {
-		this.m_z0 = new ComplexNumber(r0, 0);;
+		this.m_z0 = new ComplexNumber(r0, 0);
 	}
 
 	private ComplexNumber m_z0 = new ComplexNumber(50.0, 0);

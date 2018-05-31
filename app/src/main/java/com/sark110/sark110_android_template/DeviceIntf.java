@@ -32,11 +32,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public abstract class DeviceIntf {
-    protected static final int COMMAND_LEN = 18;
+    static final int COMMAND_LEN = 18;
 
-    protected Context mContext;
+    Context mContext;
 
-    protected boolean mConnected;
+    boolean mConnected;
 
     private int mProtocolVer = 0;
     private byte[] mSarkVer = null;
@@ -49,12 +49,12 @@ public abstract class DeviceIntf {
         return mSarkVer;
     }
 
-    public DeviceIntf() {
+    DeviceIntf() {
     }
-    public DeviceIntf(Context context){
+    DeviceIntf(Context context){
         this.mContext = context;
     }
-    public boolean isConnected () {
+    boolean isConnected() {
         return mConnected;
     }
     abstract void onCreate ();
@@ -64,7 +64,7 @@ public abstract class DeviceIntf {
     abstract void close();
 
     /* Listener handling */
-    protected DeviceIntfListener mListener;
+    DeviceIntfListener mListener;
 
     public void setDeviceIntfListener(DeviceIntfListener listener) {
         this.mListener = listener;
@@ -75,12 +75,12 @@ public abstract class DeviceIntf {
          * Event fired when the connection status changes.
          * The event is also fired when the Connect() method ends, returning the result of the Connect() request.
          */
-        public void onConnectionStateChanged(DeviceIntf helper, boolean isConnected);
+        void onConnectionStateChanged(DeviceIntf helper, boolean isConnected);
     }
 
     public int VersionCmd ()
     {
-        int status = -1;
+        int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
@@ -98,7 +98,7 @@ public abstract class DeviceIntf {
 
     public int BeepCmd()
     {
-        int status = -1;
+        int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
@@ -111,7 +111,7 @@ public abstract class DeviceIntf {
 
     public MeasureDataBin MeasureCmd(float freq)
     {
-        int status = -1;
+        int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
@@ -148,7 +148,7 @@ public abstract class DeviceIntf {
         return (1.0f + (float)cxRho.mod()) / (1.0f - (float)cxRho.mod());
     }
 
-    public byte[] Int2Buf (int val)
+    private byte[] Int2Buf(int val)
     {
         byte[] buf = new byte[4];
 
@@ -176,7 +176,6 @@ public abstract class DeviceIntf {
     {
         byte[] bufFloat = new byte[4];
         System.arraycopy(buf, n, bufFloat, 0, 4);
-        float val = ByteBuffer.wrap(bufFloat).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-        return val;
+        return ByteBuffer.wrap(bufFloat).order(ByteOrder.LITTLE_ENDIAN).getFloat();
     }
 }
