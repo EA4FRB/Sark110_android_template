@@ -1,11 +1,16 @@
 package com.sark110.sark110_android_template;
 
-/*
+import android.content.Context;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+/**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
  *
  * MIT License
  *
- * Copyright (c) 2018 Melchor Varela - EA4FRB
+ * @author Copyright (c) 2018 Melchor Varela - EA4FRB
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +30,6 @@ package com.sark110.sark110_android_template;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import android.content.Context;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public abstract class DeviceIntf {
     static final int COMMAND_LEN = 18;

@@ -1,11 +1,11 @@
 package com.sark110.sark110_android_template;
 
-/*
+/**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
  *
  * MIT License
  *
- * Copyright (c) 2018 Melchor Varela - EA4FRB
+ * @author Copyright (c) 2018 Melchor Varela - EA4FRB
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

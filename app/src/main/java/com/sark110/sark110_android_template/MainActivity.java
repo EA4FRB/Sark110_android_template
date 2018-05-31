@@ -1,11 +1,21 @@
 package com.sark110.sark110_android_template;
 
-/*
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
+
+/**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
  *
  * MIT License
  *
- * Copyright (c) 2018 Melchor Varela - EA4FRB
+ * @author Copyright (c) 2018 Melchor Varela - EA4FRB
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +35,6 @@ package com.sark110.sark110_android_template;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.TextView;
-
 public class MainActivity extends AppCompatActivity {
     private DeviceIntf mDevIntf;
 

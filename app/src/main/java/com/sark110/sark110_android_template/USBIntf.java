@@ -1,11 +1,25 @@
 package com.sark110.sark110_android_template;
 
-/*
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
+import java.util.Objects;
+
+/**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
  *
  * MIT License
  *
- * Copyright (c) 2018 Melchor Varela - EA4FRB
+ * @author Copyright (c) 2018 Melchor Varela - EA4FRB
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,22 +39,6 @@ package com.sark110.sark110_android_template;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.hardware.usb.UsbConstants;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbEndpoint;
-import android.hardware.usb.UsbInterface;
-import android.hardware.usb.UsbManager;
-
-import java.util.Objects;
-
 class USBIntf extends DeviceIntf {
     private static final String ACTION_USB_PERMISSION = "com.google.android.HID.action.USB_PERMISSION";
 
