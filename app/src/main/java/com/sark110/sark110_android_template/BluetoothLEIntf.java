@@ -360,5 +360,4 @@ class BluetoothLEIntf extends DeviceIntf {
         System.arraycopy(mDataRcv, 0, rcv, 0, COMMAND_LEN);
         return 1;
     }
-
 }
