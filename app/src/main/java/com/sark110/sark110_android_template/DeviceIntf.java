@@ -32,27 +32,27 @@ import java.nio.ByteOrder;
 public abstract class DeviceIntf {
     static final int COMMAND_LEN = 18;
 
-    static final int CMD_SARK_VERSION =		1;	/* Returns version of the protocol */
-    static final int CMD_SARK_MEAS_RX =		2;	/* Measures R and X */
-    static final int CMD_SARK_MEAS_VECTOR =	3;	/* Measures raw vector data */
-    static final int CMD_SARK_SIGNAL_GEN =	4;	/* Signal generator */
-    static final int CMD_SARK_MEAS_RF =		5;	/* Measures RF */
-    static final int CMD_SARK_MEAS_VEC_THRU =	6;	/* Measures raw vector thru data */
-    static final int CMD_BATT_STAT =		7;	/* Battery charger status */
-    static final int CMD_DISK_INFO =		8;	/* Get disk information */
-    static final int CMD_DISK_VOLUME =		9;	/* Get disk volume name */
-    static final int CMD_SARK_MEAS_RX_EXT =	12;	/* Measures R and X; efficient (x4 samples) */
-    static final int CMD_BUZZER	=			20;	/* Sounds buzzer */
-    static final int CMD_GET_KEY =			21;	/* Get key */
-    static final int CMD_DEV_RST =			50;	/* Reset */
+    private static final int CMD_SARK_VERSION =		1;	/* Returns version of the protocol */
+    private static final int CMD_SARK_MEAS_RX =		2;	/* Measures R and X */
+    private static final int CMD_SARK_MEAS_VECTOR =	3;	/* Measures raw vector data */
+    private static final int CMD_SARK_SIGNAL_GEN =	4;	/* Signal generator */
+    private static final int CMD_SARK_MEAS_RF =		5;	/* Measures RF */
+    private static final int CMD_SARK_MEAS_VEC_THRU =	6;	/* Measures raw vector thru data */
+    private static final int CMD_BATT_STAT =		7;	/* Battery charger status */
+    private static final int CMD_DISK_INFO =		8;	/* Get disk information */
+    private static final int CMD_DISK_VOLUME =		9;	/* Get disk volume name */
+    private static final int CMD_SARK_MEAS_RX_EXT =	12;	/* Measures R and X; efficient (x4 samples) */
+    private static final int CMD_BUZZER	=			20;	/* Sounds buzzer */
+    private static final int CMD_GET_KEY =			21;	/* Get key */
+    private static final int CMD_DEV_RST =			50;	/* Reset */
 
     /* Position 0 in responses */
-    static final int ANS_SARK_OK =			'O';
-    static final int ANS_SARK_ERR =			'E';
+    private static final int ANS_SARK_OK =			'O';
+    private static final int ANS_SARK_ERR =			'E';
 
     /* Position 5 in CMD_SARK_MEAS_RX */
-    static final int PAR_SARK_CAL =			1;	/* OSL calibrated val */
-    static final int PAR_SARK_UNCAL =		2;	/* Raw val */
+    private static final int PAR_SARK_CAL =			1;	/* OSL calibrated val */
+    private static final int PAR_SARK_UNCAL =		2;	/* Raw val */
 
     /**
      * Raw detectors measurement output
