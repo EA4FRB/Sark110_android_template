@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Sark110_android_template</string>
     <string name="action_settings">Settings</string>
+
+    <string name="prefcat_settings_title">Settings</string>
+
+    <string name="pref_bluetooth_setting_title">Bluetooth</string>
+    <string name="pref_bluetooth_setting_summary">Check for Bluetooth connection. Uncheck for USB</string>
+    <string name="key_of_pref_Bluetooth">pref_Bluetooth</string>
+
 </resources>

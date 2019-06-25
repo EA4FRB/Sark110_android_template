@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory 
+        android:title="@string/prefcat_settings_title"
+        android:key="pref_default_storage_settings">
+		<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="pref_Bluetooth"
+			android:summary="@string/pref_bluetooth_setting_summary"
+			android:title="@string/pref_bluetooth_setting_title" >
+		</CheckBoxPreference>
+	</PreferenceCategory>
+</PreferenceScreen>

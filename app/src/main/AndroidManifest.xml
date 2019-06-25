@@ -41,6 +41,7 @@
             <!-- SARK110 -->
 
         </activity>
+        <activity android:name=".SettingsActivity"/>
     </application>
 
 </manifest>

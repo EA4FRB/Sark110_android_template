@@ -16,16 +16,54 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Disconnected" />
+        android:text="Disconnected"
+        android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
     <TextView
-        android:id="@+id/terminal"
+        android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Press info button!" />
+        android:text= " " />
+
+    <TextView
+        android:id="@+id/frequency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:text="Frequency:"
+        android:inputType="numberDecimal"
+        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+    <EditText
+        android:id="@+id/frequency_entry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        android:layout_marginStart="8dp"
+        android:text="10000000"
+        android:textAppearance="@android:style/TextAppearance.Material.Large.Inverse" />
+
+    <TextView
+        android:id="@+id/swr_val"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="VSWR: "
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+    <TextView
+        android:id="@+id/impedance_val"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Z:"
+        android:layout_marginStart="16dp"
+        android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
 </LinearLayout>

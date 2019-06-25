@@ -1,14 +1,18 @@
 package com.sark110.sark110_android_template;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 /**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
@@ -36,41 +40,99 @@ import android.widget.TextView;
  * SOFTWARE.
  */
 public class MainActivity extends AppCompatActivity {
+    private boolean mIsBluetooth = false;
     private DeviceIntf mDevIntf;
+    private float mFreq;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        PreferenceManager.setDefaultValues(this, R.xml.default_preferences, false);
         setContentView(R.layout.activity_main);
+        /* Get stored preferences */
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "SARK110 Test", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                TestSark();
-            }
-        });
-
         /* SARK110 */
-        //mDevIntf = new BluetoothLEIntf(this);     // Create instance: Bluetooth option (future device with LE support)
-        mDevIntf = new USBIntf(this);       // Create instance: USB option
+        mIsBluetooth = prefs.getBoolean("pref_Bluetooth", false);
+        mDevIntf = new BluetoothLEIntf(this);     // Create instance: Bluetooth option (future device with LE support)
+        if (mIsBluetooth)
+            mDevIntf = new BluetoothLEIntf(this);
+        else
+            mDevIntf = new USBIntf(this);
 		mDevIntf.onCreate();
 		// Setup listener for connection events from the device
         mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
             @Override
             public void onConnectionStateChanged(DeviceIntf deviceIntf, final boolean isConnected) {
-                TextView text = findViewById(R.id.connect_stat);
-                if (isConnected)
-                    text.setText("Connected");
+                TextView textConn = findViewById(R.id.connect_stat);
+                TextView textVer = findViewById(R.id.status);
+                if (isConnected) {
+                    textConn.setText("Connected");
+                    mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
+                    mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
+                    textVer.setText("Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()));
+                }
                 else {
-                    text.setText("Disconnected");
+                    textConn.setText("Disconnected");
+                    textVer.setText("");
                 }
             }
         });
+
+        final EditText etFreq = findViewById(R.id.frequency_entry);
+        mFreq = etFreq.getText().toString().isEmpty()?GblDefs.DEF_FREQ_START:Float.valueOf(etFreq.getText().toString());
+        /* Validation */
+        etFreq.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                if( etFreq.getText().toString().length() == 0 )
+                    etFreq.setError("Empty value");
+                else if (Float.valueOf(etFreq.getText().toString()) < GblDefs.MIN_FREQ)
+                    etFreq.setError("Below min");
+                else if (Float.valueOf(etFreq.getText().toString()) > GblDefs.MAX_FREQ)
+                    etFreq.setError("Above max");
+            }
+        });
+
+        // Create the Handler object (on the main thread by default)
+        final Handler handler = new Handler();
+        // Define the code block to be executed
+        Runnable runnableCode = new Runnable() {
+            @Override
+            public void run() {
+                if (!mDevIntf.isConnected())
+                    mDevIntf.connect();
+                MeasureDataBin bin = mDevIntf.MeasureCmd(mFreq/1000000);
+                TextView textSWR = findViewById(R.id.swr_val);
+                TextView textZ = findViewById(R.id.impedance_val);
+                if (bin != null) {
+                    textSWR.setText("VSWR: " + String.format("%.2f", bin.getVswr()));
+                    float xs = bin.getXs();
+                    if (xs < 0)
+                        textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " -j" + String.format("%.2f", Math.abs(xs)));
+                    else
+                        textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " +j" + String.format("%.2f", Math.abs(xs)));
+                }
+                else {
+                    textSWR.setText("VSWR: ");
+                    textZ.setText("Z: ");
+                }
+
+                // Repeat this the same runnable code block again another 1 second
+                // 'this' is referencing the Runnable object
+                handler.postDelayed(this, 1000);
+            }
+        };
+        // Start the initial runnable task by posting through the handler
+        handler.post(runnableCode);
     }
 
     @Override
@@ -97,29 +159,12 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingIntent =  new Intent(this, SettingsActivity.class);
+            startActivity(settingIntent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void TestSark () {
-        if (!mDevIntf.isConnected())
-            mDevIntf.connect();
-        else {
-            TextView text = findViewById(R.id.terminal);
-            mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
-            mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
-            text.setText(
-                    "Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()) + "\n"
-            );
-            text.append("\n* Measurements: *\n");
-            for (int i = 1; i < 10; i++) {   // Perform measurement at a frequency; obtain the different parameters using MeasureDataBin class methods
-                MeasureDataBin bin = mDevIntf.MeasureCmd(10.0f + (float) (i));
-                text.append("Frequency: " + (10.0f + i) + " VSWR: " + bin.getVswr() + " Rs:" + bin.getRs() + " Xs: " + bin.getXs() + "\n");
-            }
-            text.append("* The end *\n");
-        }
     }
 
 }
