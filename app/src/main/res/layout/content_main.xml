@@ -9,7 +9,6 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-
     <TextView
         android:id="@+id/connect_stat"
         android:layout_width="wrap_content"
@@ -42,8 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="VSWR: "
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:layout_marginStart="16dp"
+        android:textSize="40dp"
         android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
     <TextView
@@ -52,6 +52,8 @@
         android:layout_height="wrap_content"
         android:text="Z:"
         android:layout_marginStart="16dp"
+        android:textSize="40dp"
+        android:layout_marginTop="8dp"
         android:textAppearance="@android:style/TextAppearance.Material.Large" />
 
 </LinearLayout>

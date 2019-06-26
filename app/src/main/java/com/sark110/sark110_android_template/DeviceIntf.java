@@ -91,7 +91,7 @@ public abstract class DeviceIntf {
     Context mContext;
     boolean mConnected;
     private int mProtocolVer = 0;
-    private byte[] mSarkVer = null;
+    private byte[] mSarkVer = {' '};
 
     /**
      * Constructors
