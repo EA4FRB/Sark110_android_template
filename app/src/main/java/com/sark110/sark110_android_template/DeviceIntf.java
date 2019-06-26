@@ -58,13 +58,13 @@ public abstract class DeviceIntf {
      * Raw detectors measurement output
      */
     public class MeasureDetector {
-        private float mFreq;
+        private int mFreq;
         private float mMagV;
         private float mPhV;
         private float mMagI;
         private float mPhI;
 
-        public float getFreq() {
+        public int getFreq() {
             return mFreq;
         }
         public float getMagV() {
@@ -79,7 +79,7 @@ public abstract class DeviceIntf {
         public float getPhI() {
             return mPhI;
         }
-        MeasureDetector(float freq, float magV, float phV, float magI, float phI) {
+        MeasureDetector(int freq, float magV, float phV, float magI, float phI) {
             this.mFreq = freq;
             this.mMagV = magV;
             this.mPhV = phV;
@@ -204,18 +204,18 @@ public abstract class DeviceIntf {
     /**
      * Takes one measurement sample at the specified frequency
      *
-     * @param freq      frequency in MHz; use 0 to turn-off the generator
+     * @param freq      frequency in Hz; use 0 to turn-off the generator
      * @param samples   number of samples for averaging
      * @return  data; or null if error
      */
-    public MeasureDataBin MeasureCmd(float freq, byte samples) {
+    public MeasureDataBin MeasureCmd(int freq, byte samples) {
         int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
 
         snd[0] = CMD_SARK_MEAS_RX;
-        System.arraycopy( Int2Buf ((int)(freq*1000000)), 0, snd, 1, 4 );
+        System.arraycopy( Int2Buf (freq), 0, snd, 1, 4 );
         snd[5] = PAR_SARK_CAL;
         snd[6] = samples;
         status = SendRcv(snd, rcv);
@@ -236,10 +236,10 @@ public abstract class DeviceIntf {
     /**
      * Takes one measurement sample at the specified frequency
      *
-     * @param freq      frequency in MHz; use 0 to turn-off the generator
+     * @param freq      frequency in Hz; use 0 to turn-off the generator
      * @return  data; or null if error
      */
-    public MeasureDataBin MeasureCmd(float freq) {
+    public MeasureDataBin MeasureCmd(int freq) {
         return MeasureCmd(freq, (byte)0);
     }
 
@@ -247,21 +247,21 @@ public abstract class DeviceIntf {
      * Takes measurement samples at four frequencies for fastest sweep speed.
      * Precision is a bit compromised because the use of half-float
      *
-     * @param freq      initial frequency in MHz; use 0 to turn-off the generator
-     * @param step      step frequency in MHz
+     * @param freq      initial frequency in Hz; use 0 to turn-off the generator
+     * @param step      step frequency in Hz
      * @param samples   number of samples for averaging
      * @return data (four); or null if error
      */
-    public MeasureDataBin[] MeasureCmdExt(float freq, float step, byte samples) {
+    public MeasureDataBin[] MeasureCmdExt(int freq, int step, byte samples) {
         int status;
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
 
         snd[0] = CMD_SARK_MEAS_RX_EXT;
-        System.arraycopy( Int2Buf ((int)(freq*1000000)), 0, snd, 1, 4 );
+        System.arraycopy( Int2Buf (freq), 0, snd, 1, 4 );
         snd[5] = PAR_SARK_CAL;
         snd[6] = samples;
-        System.arraycopy( Int2Buf ((int)(step*1000000)), 0, snd, 7, 4 );
+        System.arraycopy( Int2Buf (step), 0, snd, 7, 4 );
         status = SendRcv(snd, rcv);
         if (rcv[0] != ANS_SARK_OK)
             status = -1;
@@ -282,21 +282,21 @@ public abstract class DeviceIntf {
             fRs = toFloat(iRs);
             iXs = Buf2Short(rcv, offset+2);
             fXs = toFloat(iXs);
-            data[1] = new MeasureDataBin(0, freq+(1.0f*step), fRs, fXs);
+            data[1] = new MeasureDataBin(0, freq+(1*step), fRs, fXs);
             offset += 4;
 
             iRs = Buf2Short(rcv, offset);
             fRs = toFloat(iRs);
             iXs = Buf2Short(rcv, offset+2);
             fXs = toFloat(iXs);
-            data[2] = new MeasureDataBin(0, freq+(2.0f*step), fRs, fXs);
+            data[2] = new MeasureDataBin(0, freq+(2*step), fRs, fXs);
             offset += 4;
 
             iRs = Buf2Short(rcv, offset);
             fRs = toFloat(iRs);
             iXs = Buf2Short(rcv, offset+2);
             fXs = toFloat(iXs);
-            data[3] = new MeasureDataBin(0, freq+(3.0f*step), fRs, fXs);
+            data[3] = new MeasureDataBin(0, freq+(3*step), fRs, fXs);
 
             return data;
         }
@@ -307,30 +307,30 @@ public abstract class DeviceIntf {
      * Takes measurement samples at four frequencies for fastest sweep speed.
      * Precision is a bit compromised because the use of half-float
      *
-     * @param freq      initial frequency in MHz; use 0 to turn-off the generator
-     * @param step      step frequency in MHz
+     * @param freq      initial frequency in Hz; use 0 to turn-off the generator
+     * @param step      step frequency in Hz
      * @return data (four); or null if error
      */
-    public MeasureDataBin[] MeasureCmdExt(float freq, float step) {
+    public MeasureDataBin[] MeasureCmdExt(int freq, int step) {
         return MeasureCmdExt(freq, step, (byte) 0);
     }
 
     /**
      * Enables signal generator.
      *
-     * @param freq  frequency in MHz; use 0 to turn-off the generator
+     * @param freq  frequency in Hz; use 0 to turn-off the generator
      * @param level output level
      * @param gain  gain multiplier
      * @return <0 error; otherwise ok
      */
-    public int SignalGenCmd(float freq, int level, byte gain) {
+    public int SignalGenCmd(int freq, int level, byte gain) {
         int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
 
         snd[0] = CMD_SARK_SIGNAL_GEN;
-        System.arraycopy( Int2Buf ((int)(freq*1000000)), 0, snd, 1, 4 );
+        System.arraycopy( Int2Buf (freq), 0, snd, 1, 4 );
         System.arraycopy(Short2Buf(level), 0, snd,5, 2);
         snd[7] = gain;
         status = SendRcv(snd, rcv);
@@ -359,17 +359,17 @@ public abstract class DeviceIntf {
     /**
      * Raw detectors measurement
      *
-     * @param freq frequency in MHz; use 0 to turn-off the generator
+     * @param freq frequency in Hz; use 0 to turn-off the generator
      * @return detectors data; or null if error
      */
-    public MeasureDetector MeasDetectorCmd(float freq) {
+    public MeasureDetector MeasDetectorCmd(int freq) {
         int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
 
         snd[0] = CMD_SARK_MEAS_VECTOR;
-        System.arraycopy( Int2Buf ((int)(freq*1000000)), 0, snd, 1, 4 );
+        System.arraycopy( Int2Buf (freq), 0, snd, 1, 4 );
         status = SendRcv(snd, rcv);
         if (rcv[0] != ANS_SARK_OK)
             status = -1;
@@ -387,17 +387,17 @@ public abstract class DeviceIntf {
     /**
      * External RF signal measurement
      *
-     * @param freq frequency in MHz; use 0 to turn-off the generator
+     * @param freq frequency in Hz; use 0 to turn-off the generator
      * @return detectors data; or null if error
      */
-    public MeasureDetector MeasRfCmd (float freq) {
+    public MeasureDetector MeasRfCmd (int freq) {
         int status;
 
         byte snd[] = new byte[COMMAND_LEN];
         byte rcv[] = new byte[COMMAND_LEN];
 
         snd[0] = CMD_SARK_MEAS_RF;
-        System.arraycopy( Int2Buf ((int)(freq*1000000)), 0, snd, 1, 4 );
+        System.arraycopy( Int2Buf (freq), 0, snd, 1, 4 );
         status = SendRcv(snd, rcv);
         if (rcv[0] != ANS_SARK_OK)
             status = -1;

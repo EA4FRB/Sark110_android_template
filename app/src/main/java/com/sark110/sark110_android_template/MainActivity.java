@@ -4,15 +4,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.alexzaitsev.meternumberpicker.MeterView;
 
 /**
  * This file is a part of the "SARK110 Antenna Vector Impedance Analyzer" software
@@ -40,9 +39,11 @@ import android.preference.PreferenceManager;
  * SOFTWARE.
  */
 public class MainActivity extends AppCompatActivity {
+    public static final String PREFS_NAME = "Sark110PrefsFile";
     private boolean mIsBluetooth = false;
     private DeviceIntf mDevIntf;
-    private float mFreq;
+    private MeterView mFreqPicker;
+    private int mLastFreq;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +51,18 @@ public class MainActivity extends AppCompatActivity {
 
         PreferenceManager.setDefaultValues(this, R.xml.default_preferences, false);
         setContentView(R.layout.activity_main);
-        /* Get stored preferences */
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mFreqPicker = (MeterView) findViewById(R.id.freqEntry);
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        mLastFreq = prefs.getInt("pref_freq", GblDefs.DEF_FREQ_START);
+        mFreqPicker.setValue(mLastFreq);
+
         /* SARK110 */
+        /* Get stored preferences */
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         mIsBluetooth = prefs.getBoolean("pref_Bluetooth", false);
         mDevIntf = new BluetoothLEIntf(this);     // Create instance: Bluetooth option (future device with LE support)
         if (mIsBluetooth)
@@ -83,25 +89,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final EditText etFreq = findViewById(R.id.frequency_entry);
-        mFreq = etFreq.getText().toString().isEmpty()?GblDefs.DEF_FREQ_START:Float.valueOf(etFreq.getText().toString());
-        /* Validation */
-        etFreq.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void afterTextChanged(Editable s) {
-                if( etFreq.getText().toString().length() == 0 )
-                    etFreq.setError("Empty value");
-                else if (Float.valueOf(etFreq.getText().toString()) < GblDefs.MIN_FREQ)
-                    etFreq.setError("Below min");
-                else if (Float.valueOf(etFreq.getText().toString()) > GblDefs.MAX_FREQ)
-                    etFreq.setError("Above max");
-            }
-        });
-
         // Create the Handler object (on the main thread by default)
         final Handler handler = new Handler();
         // Define the code block to be executed
@@ -110,7 +97,24 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if (!mDevIntf.isConnected())
                     mDevIntf.connect();
-                MeasureDataBin bin = mDevIntf.MeasureCmd(mFreq/1000000);
+                int freq = mFreqPicker.getValue();
+                if (freq < GblDefs.MIN_FREQ) {
+                    freq = mLastFreq;
+                    mFreqPicker.setValue(freq);
+                }
+                else if (freq > GblDefs.MAX_FREQ) {
+                    freq = mLastFreq;
+                    mFreqPicker.setValue(freq);
+                }
+                else {
+                    if (freq != mLastFreq) {
+                        SharedPreferences.Editor edit = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+                        edit.putInt("pref_freq", freq);
+                        edit.apply();
+                    }
+                    mLastFreq = freq;
+                }
+                MeasureDataBin bin = mDevIntf.MeasureCmd(freq);
                 TextView textSWR = findViewById(R.id.swr_val);
                 TextView textZ = findViewById(R.id.impedance_val);
                 if (bin != null) {

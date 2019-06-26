@@ -3,6 +3,7 @@
     <PreferenceCategory 
         android:title="@string/prefcat_settings_title"
         android:key="pref_default_storage_settings">
+
 		<CheckBoxPreference
 			android:defaultValue="false"
 			android:key="pref_Bluetooth"

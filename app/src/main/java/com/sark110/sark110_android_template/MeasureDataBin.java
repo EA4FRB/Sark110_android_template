@@ -28,7 +28,7 @@ package com.sark110.sark110_android_template;
 
 public class MeasureDataBin {
 	private long mId;
-	private float mFreq;
+	private int mFreq;
 	private ComplexNumber mZs;
 
 	public void set_RefImp(float r0) {
@@ -39,7 +39,7 @@ public class MeasureDataBin {
 
 	public MeasureDataBin(){}
 
-	public MeasureDataBin(long id, float freq, float Rs, float Xs){
+	public MeasureDataBin(long id, int freq, float Rs, float Xs){
 		this.mId = id;
 		this.mFreq = freq;
 		this.mZs = new ComplexNumber(Rs, Xs);
@@ -53,10 +53,10 @@ public class MeasureDataBin {
 		mId = _id;
 	}
 
-	public float getFreq(){
+	public int getFreq(){
 		return mFreq;
 	}
-	public void setFreq(float _freq){
+	public void setFreq(int _freq){
 		mFreq =_freq;
 	}
 
@@ -128,15 +128,15 @@ public class MeasureDataBin {
 		return (1.0f + (float)cxRho.mod()) / (1.0f - (float)cxRho.mod());
 	}
 
-	private double calcL(ComplexNumber cxZ, float freq)
+	private double calcL(ComplexNumber cxZ, int freq)
 	{
-		return cxZ.getIm() / (2.0 * Math.PI * (freq / 1000000.0));
+		return cxZ.getIm() / (2.0 * Math.PI * ((double)freq / 1000000.0));
 	}
 
-	private double calcC(ComplexNumber cxZ, float freq)
+	private double calcC(ComplexNumber cxZ, int freq)
 	{
 		if (cxZ.getIm() == 0)
 			return -99999.99;
-		return -1000000.0 / (cxZ.getIm() * 2.0 * Math.PI * (freq / 1000000.0));
+		return -1000000.0 / (cxZ.getIm() * 2.0 * Math.PI * ((double)freq / 1000000.0));
 	}
 }
