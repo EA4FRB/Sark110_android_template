@@ -95,18 +95,14 @@ public class MainActivity extends AppCompatActivity {
         Runnable runnableCode = new Runnable() {
             @Override
             public void run() {
-                if (!mDevIntf.isConnected())
-                    mDevIntf.connect();
                 int freq = mFreqPicker.getValue();
                 if (freq < GblDefs.MIN_FREQ) {
                     freq = mLastFreq;
                     mFreqPicker.setValue(freq);
-                }
-                else if (freq > GblDefs.MAX_FREQ) {
+                } else if (freq > GblDefs.MAX_FREQ) {
                     freq = mLastFreq;
                     mFreqPicker.setValue(freq);
-                }
-                else {
+                } else {
                     if (freq != mLastFreq) {
                         SharedPreferences.Editor edit = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
                         edit.putInt("pref_freq", freq);
@@ -114,22 +110,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                     mLastFreq = freq;
                 }
-                MeasureDataBin bin = mDevIntf.MeasureCmd(freq);
-                TextView textSWR = findViewById(R.id.swr_val);
-                TextView textZ = findViewById(R.id.impedance_val);
-                if (bin != null) {
-                    textSWR.setText("VSWR: " + String.format("%.2f", bin.getVswr()));
-                    float xs = bin.getXs();
-                    if (xs < 0)
-                        textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " -j" + String.format("%.2f", Math.abs(xs)));
-                    else
-                        textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " +j" + String.format("%.2f", Math.abs(xs)));
-                }
+                if (!mDevIntf.isConnected())
+                    mDevIntf.connect();
                 else {
-                    textSWR.setText("VSWR: ");
-                    textZ.setText("Z: ");
+                    MeasureDataBin bin = mDevIntf.MeasureCmd(freq);
+                    TextView textSWR = findViewById(R.id.swr_val);
+                    TextView textZ = findViewById(R.id.impedance_val);
+                    if (bin != null) {
+                        textSWR.setText("VSWR: " + String.format("%.2f", bin.getVswr()));
+                        float xs = bin.getXs();
+                        if (xs < 0)
+                            textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " -j" + String.format("%.2f", Math.abs(xs)));
+                        else
+                            textZ.setText("Z: " + String.format("%.2f", bin.getRs()) + " +j" + String.format("%.2f", Math.abs(xs)));
+                    } else {
+                        textSWR.setText("VSWR: ");
+                        textZ.setText("Z: ");
+                    }
                 }
-
                 // Repeat this the same runnable code block again another 1 second
                 // 'this' is referencing the Runnable object
                 handler.postDelayed(this, 1000);
@@ -145,6 +143,14 @@ public class MainActivity extends AppCompatActivity {
 
         /* SARK110 */
         mDevIntf.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        /* SARK110 */
+        mDevIntf.close();
     }
 
     @Override
