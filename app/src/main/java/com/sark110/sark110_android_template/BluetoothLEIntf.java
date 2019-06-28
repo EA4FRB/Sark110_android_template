@@ -144,6 +144,7 @@ class BluetoothLEIntf extends DeviceIntf {
                     if (deviceName.matches("SARK110.[0-9a-fA-F]{4}")) {
                         BluetoothLEIntf.GattClientCallback gattClientCallback = new BluetoothLEIntf.GattClientCallback();
                         mGatt = device.connectGatt(mContext, true, gattClientCallback);
+                        break;
                     }
                 }
             }
