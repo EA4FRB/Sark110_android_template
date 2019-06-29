@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private DeviceIntf mDevIntf;
     private MeterView mFreqPicker;
     private int mLastFreq;
+    private boolean mFirstTimeConnect = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,16 +76,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onConnectionStateChanged(DeviceIntf deviceIntf, final boolean isConnected) {
                 TextView textConn = findViewById(R.id.connect_stat);
-                TextView textVer = findViewById(R.id.status);
                 if (isConnected) {
                     textConn.setText("Connected");
-                    mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
-                    mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
-                    textVer.setText("Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()));
+                    mFirstTimeConnect = true;
                 }
                 else {
                     textConn.setText("Disconnected");
-                    textVer.setText("");
+                    TextView textVer = findViewById(R.id.status);
+                    textVer.setText(" ");
+                    mFirstTimeConnect = false;
                 }
             }
         });
@@ -113,6 +113,14 @@ public class MainActivity extends AppCompatActivity {
                 if (!mDevIntf.isConnected())
                     mDevIntf.connect();
                 else {
+                    if (mFirstTimeConnect)
+                    {
+                        TextView textVer = findViewById(R.id.status);
+                        mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
+                        mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
+                        textVer.setText("Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()));
+                        mFirstTimeConnect = false;
+                    }
                     MeasureDataBin bin = mDevIntf.MeasureCmd(freq);
                     TextView textSWR = findViewById(R.id.swr_val);
                     TextView textZ = findViewById(R.id.impedance_val);
