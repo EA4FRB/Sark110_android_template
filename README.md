@@ -43,7 +43,7 @@ The following resource file should be saved in res/xml/device_filter.xml:
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- SARK-110 -->
-    <usb-device vendor-id="0483" product-id="5750" />
+	<usb-device vendor-id="1155" product-id="22352" />
 </resources>
 ```
 It specifies the VID and PID for the SARK-110.
@@ -117,9 +117,12 @@ With the connection established, use any of the provided methods for communicati
 The analyzer will need to be bonded to the Android device in advance. Use the Bluetooth setup in the Android device to bond the analyzer.
 
 ## License
-Copyright (c) 2018 Melchor Varela - EA4FRB
+Copyright (c) 2018-2019 Melchor Varela - EA4FRB
 
 Licensed under the MIT License (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at [MIT License](https://opensource.org/licenses/MIT)
+
+## Screenshot
+![Screenshot](sark110_template_screenshot.png)
 	
