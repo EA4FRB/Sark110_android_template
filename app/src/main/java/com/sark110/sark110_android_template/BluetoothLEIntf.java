@@ -258,7 +258,7 @@ class BluetoothLEIntf extends DeviceIntf {
             final String deviceName = device.getName();
             if (deviceName != null)
             {
-                if (deviceName.matches("SARK110-[0-9a-fA-F]{4}")) {
+                if (deviceName.matches("SARK110.[0-9a-fA-F]{4}")) {
                     mScanResults.put(deviceAddress, device);
                     stopScan();
                 }
