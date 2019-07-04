@@ -10,6 +10,9 @@ import android.widget.TextView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.Manifest;
+import android.support.v4.app.ActivityCompat;
+import android.content.pm.PackageManager;
 
 import com.alexzaitsev.meternumberpicker.MeterView;
 
@@ -45,10 +48,19 @@ public class MainActivity extends AppCompatActivity {
     private MeterView mFreqPicker;
     private int mLastFreq;
     private boolean mFirstTimeConnect = false;
+    private boolean mBlePermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean permissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if(!permissionGranted) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 200);
+        }
+        else
+            mBlePermission = true;
 
         PreferenceManager.setDefaultValues(this, R.xml.default_preferences, false);
         setContentView(R.layout.activity_main);
@@ -70,7 +82,11 @@ public class MainActivity extends AppCompatActivity {
             mDevIntf = new BluetoothLEIntf(this);
         else
             mDevIntf = new USBIntf(this);
-		mDevIntf.onCreate();
+        TextView textConn = findViewById(R.id.connect_stat);
+        if (!mDevIntf.IsAvailable())
+            textConn.setText("Not Available");
+
+        mDevIntf.onCreate();
 		// Setup listener for connection events from the device
         mDevIntf.setDeviceIntfListener(new DeviceIntf.DeviceIntfListener() {
             @Override
@@ -116,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     if (mFirstTimeConnect)
                     {
                         TextView textVer = findViewById(R.id.status);
+                        mDevIntf.VersionCmd();  // Dummy command (sometimes the first fails)
                         mDevIntf.BeepCmd();     // Beeps the SARK-110 buzzer
                         mDevIntf.VersionCmd();  // Gets the SARK-110 version: use getSarkVer() and getProtocolVer()
                         textVer.setText("Version: " + new String(mDevIntf.getSarkVer()) + " Protocol: " + String.valueOf(mDevIntf.getProtocolVer()));
@@ -185,4 +202,14 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 200: {
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mBlePermission = true;
+                }
+            }
+        }
+    }
 }

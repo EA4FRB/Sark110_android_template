@@ -115,6 +115,7 @@ public abstract class DeviceIntf {
     abstract void connect();
     abstract int SendRcv(byte snd[], byte rcv[]);
     abstract void close();
+    abstract boolean IsAvailable();
 
     /* Listener handling */
     DeviceIntfListener mListener;

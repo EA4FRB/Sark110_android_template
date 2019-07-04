@@ -85,7 +85,10 @@ class USBIntf extends DeviceIntf {
     public void onResume() {
 
     }
-
+    boolean IsAvailable()
+    {
+        return true;    //@TODO
+    }
     private boolean setDevice(Intent intent) {
         boolean rc = true;
 

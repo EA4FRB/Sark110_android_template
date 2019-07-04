@@ -71,7 +71,7 @@ class BluetoothLEIntf extends DeviceIntf {
     private static final long SCAN_TIMEOUT = 10000;      /* ms */
     private static final long RCV_TIMEOUT = 500;         /* ms */
 
-    private boolean mScanning;
+    private boolean mScanning = false;
     private Handler mScanHandler;
     private Map<String, BluetoothDevice> mScanResults;
 
@@ -119,16 +119,21 @@ class BluetoothLEIntf extends DeviceIntf {
     /* functions */
     public void close()
     {
+        stopScan();
         disconnectGattServer();
     }
 
     void connect() {
         /*
-         * Implemented the comment bond method. This requires that the user manually bonds the device
-         * from the Bluetooth setup menu
+         * Implements the comment bond method. This requires that the user manually bonds the device
+         * from the Bluetooth setup menu.
          */
-        connectBond();
-        //startScan();
+        //connectBond();
+
+        /*
+         * Implements the scan method.
+         */
+        startScan();
     }
 
     private void connectBond()
@@ -150,15 +155,30 @@ class BluetoothLEIntf extends DeviceIntf {
             }
         }
     }
+
+    boolean IsAvailable()
+    {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)== false)
+            return false;
+
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return mBluetoothAdapter.isEnabled();
+    }
+
     /* scanning */
     private void startScan() {
-        if (mScanning)
+        if (!IsAvailable()) {
+            return;
+        }
+        if (mScanning)      // Scanning already in progress
             return;
         disconnectGattServer();
         mScanResults = new HashMap<>();
         mScanCallback = new BluetoothLEIntf.BtleScanCallback(mScanResults);
 
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
+        if (mBluetoothLeScanner == null)
+            return;
 
         // Note: Filtering does not work the same (or at all) on most devices. It also is unable to
         // search for a mask or anything less than a full UUID.
@@ -167,14 +187,17 @@ class BluetoothLEIntf extends DeviceIntf {
         ScanFilter scanFilter = new ScanFilter.Builder()
                 .setServiceUuid(new ParcelUuid(SERVICE_UUID))
                 .build();
-        List<ScanFilter> filters = new ArrayList<>();
-        // Commented as it does not work
-        // filters.add(scanFilter);
 
         ScanSettings settings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+//                .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)    // Faster
                 .build();
 
+        List<ScanFilter> filters = new ArrayList<>();
+        // Commented as it does not work
+        //filters.add(scanFilter);
+
+        mScanning = true;
         mBluetoothLeScanner.startScan(filters, settings, mScanCallback);
 
         mScanHandler = new Handler();
@@ -185,29 +208,19 @@ class BluetoothLEIntf extends DeviceIntf {
             }
         }, SCAN_TIMEOUT);
 
-        mScanning = true;
     }
 
     private void stopScan() {
         if (mScanning && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothLeScanner != null) {
-            mBluetoothLeScanner.stopScan(mScanCallback);
-            scanComplete();
+            if (mBluetoothLeScanner != null)
+                mBluetoothLeScanner.stopScan(mScanCallback);
+            mBluetoothLeScanner = null;
         }
         mScanCallback = null;
-        mScanning = false;
         mScanHandler = null;
-        if (mScanResults.isEmpty())
-            setConnected(false);
-    }
-
-    private void scanComplete() {
         if (mScanResults.isEmpty()) {
-            return;
-        }
-
-        for (String deviceAddress : mScanResults.keySet()) {
-            BluetoothDevice device = mScanResults.get(deviceAddress);
-            connectDevice(device);
+            mScanning = false;
+            setConnected(false);
         }
     }
 
@@ -253,6 +266,8 @@ class BluetoothLEIntf extends DeviceIntf {
         }
 
         private void addScanResult(ScanResult result) {
+            if (!mScanResults.isEmpty())        /* Already detected */
+                return;
             BluetoothDevice device = result.getDevice();
             String deviceAddress = device.getAddress();
             final String deviceName = device.getName();
@@ -260,6 +275,8 @@ class BluetoothLEIntf extends DeviceIntf {
             {
                 if (deviceName.matches("SARK110.[0-9a-fA-F]{4}")) {
                     mScanResults.put(deviceAddress, device);
+                    BluetoothDevice sarkDevice = mScanResults.get(deviceAddress);
+                    connectDevice(sarkDevice);
                     stopScan();
                 }
             }
@@ -302,6 +319,8 @@ class BluetoothLEIntf extends DeviceIntf {
         }
     }
     private void setConnected(boolean connected) {
+        if (connected == false)
+            mScanning = false;  // A new scan could be started
         mConnected = connected;
         InCaseFireConnectionStateChanged();
     }
