@@ -2,13 +2,13 @@
 Android template application for the SARK-110 Antenna Analyzer
 
 ## About
-This template application includes the interface classes for communicating with the SARK-110 via USB or Bluetooth LE (future model) and includes a basic example.
+This template application includes the interface classes for communicating with the SARK-110 via USB or Bluetooth LE (SARK-110-ULM only) and includes a basic example.
 
 ## Pre-requisites
 - Android Studio
 - Android tablet or smartphone with USB host support 
 - USB OTG cable
-- SARK-110
+- SARK-110 or SARK-110-ULM
 
 ## Usage
 The template application is ready to go and it implements the basic functionality.
@@ -62,7 +62,7 @@ Define a member variable of DeviceIntf class
     private DeviceIntf mDevIntf;
 ```
 
-In onCreate() method of the activity, create an instance of the USBIntf class (for USB communications) or BluetoothLEIntf class (for Bluetooth LE communications; future device).
+In onCreate() method of the activity, create an instance of the USBIntf class (for USB communications) or BluetoothLEIntf class (for Bluetooth LE communications; SARK-110-ULM only).
 Then call method onCreate() and then setup a listener for connection events.
 ```Java
     @Override
@@ -112,9 +112,6 @@ With the connection established, use any of the provided methods for communicati
         text.append("* The end *\n");
     }
 ```
-
-### Considerations for Bluetooth
-The analyzer will need to be bonded to the Android device in advance. Use the Bluetooth setup in the Android device to bond the analyzer.
 
 ## License
 Copyright (c) 2018-2019 Melchor Varela - EA4FRB
