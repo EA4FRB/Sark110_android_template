@@ -1,5 +1,5 @@
 # Sark110_android_template
-Android template application for the SARK-110 Antenna Analyzer
+Android template application for the SARK-110 Antenna Analyzer series.
 
 ## About
 This template application includes the interface classes for communicating with the SARK-110 via USB or Bluetooth LE (SARK-110-ULM only) and includes a basic example.
